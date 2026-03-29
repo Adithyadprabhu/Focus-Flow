@@ -1,0 +1,64 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "users": {
+      ".read": "auth != null",
+      ".indexOn": ["role"],
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+
+    "tests": {
+      ".read": "auth != null",
+      "$testId": {
+        ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'teacher'"
+      }
+    },
+
+    "questions": {
+      "$testId": {
+        ".read": "auth != null",
+        ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'teacher'"
+      }
+    },
+
+    "attempts": {
+      "$attemptId": {
+        ".read": "auth != null && (data.child('studentId').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'teacher')",
+        ".write": "auth != null && (!data.exists() || data.child('studentId').val() === auth.uid)"
+      }
+    },
+
+    "analytics": {
+      ".read": "auth != null",
+      "$studentId": {
+        ".write": "auth != null && auth.uid === $studentId"
+      }
+    },
+
+    "studentAttempts": {
+      "$studentId": {
+        ".read": "auth != null && (auth.uid === $studentId || root.child('users').child(auth.uid).child('role').val() === 'teacher')",
+        ".write": "auth != null && auth.uid === $studentId"
+      }
+    },
+    "live_sessions": {
+      "$testId": {
+        ".read": "auth != null",
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid"
+        }
+      }
+    },
+
+    "status": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    }
+  }
+}
