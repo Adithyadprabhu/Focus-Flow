@@ -13,6 +13,7 @@
 
     "tests": {
       ".read": "auth != null",
+      ".indexOn": ["isPublished", "createdBy"],
       "$testId": {
         ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'teacher'"
       }

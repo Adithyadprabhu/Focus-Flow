@@ -1,16 +1,17 @@
 'use client';
 
 import { useState, useEffect, useRef, useMemo } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import AppHeader from '../components/AppHeader';
 import BottomNav from '../components/BottomNav';
-import GradientFAB from '../components/GradientFAB';
 import AIAssistantChat from '../components/AIAssistantChat';
-import { onAuthStateChanged } from 'firebase/auth';
+import AnimatedNumber from '../components/AnimatedNumber';
+import Skeleton from '../components/Skeleton';
 import { ref, onValue } from 'firebase/database';
-import { auth, db } from '../../lib/firebase';
+import { db } from '../../lib/firebase';
+import { useAuthUser } from '../hooks/useAuthUser';
+import toast from 'react-hot-toast';
 
 // ─── Pure-SVG Line Chart ──────────────────────────────────────────────────────
 function LineChart({ data, height = 160 }) {
@@ -115,55 +116,22 @@ function LineChart({ data, height = 160 }) {
   );
 }
 
-// ─── Animated Number ──────────────────────────────────────────────────────────
-function AnimatedNumber({ value, suffix = '' }) {
-  const [display, setDisplay] = useState(0);
-  const raf = useRef(null);
-
-  useEffect(() => {
-    const start = display;
-    const end = Number(value) || 0;
-    const startTime = performance.now();
-    const duration = 600;
-    const tick = (now) => {
-      const t = Math.min((now - startTime) / duration, 1);
-      const eased = 1 - Math.pow(1 - t, 3);
-      setDisplay(Math.round(start + (end - start) * eased));
-      if (t < 1) raf.current = requestAnimationFrame(tick);
-    };
-    raf.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf.current);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value]);
-
-  return <span>{display}{suffix}</span>;
-}
-
-// ─── Skeleton ─────────────────────────────────────────────────────────────────
-function Skeleton({ className = '' }) {
-  return <div className={`bg-surface-container-high animate-pulse rounded-xl ${className}`} />;
-}
-
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function TeacherDashboard() {
   const router = useRouter();
-  const pathname = usePathname();
-  const [user, setUser] = useState(null);
+  const { user, loading: authLoading } = useAuthUser();
   const [analyticsTree, setAnalyticsTree] = useState(null);
   const [usersMap, setUsersMap] = useState({});
   const [teacherTestIds, setTeacherTestIds] = useState(new Set());
   const [isLoading, setIsLoading] = useState(true);
-  const [showToast, setShowToast] = useState(false);
   const isInitialLoad = useRef(true);
 
-  // ── Auth ──
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      if (!u) { router.push('/'); setIsLoading(false); return; }
-      setUser(u);
-    });
-    return () => unsub();
-  }, [router]);
+    if (!authLoading && !user) {
+      router.push('/');
+      setTimeout(() => setIsLoading(false), 0);
+    }
+  }, [authLoading, user, router]);
 
   // ── Teacher's own tests — used to scope analytics ──
   useEffect(() => {
@@ -176,7 +144,6 @@ export default function TeacherDashboard() {
         });
       }
       setTeacherTestIds(ids);
-      console.log("Teacher Tests:", Array.from(ids)); // Debugging log
     });
     return () => unsub();
   }, [user]);
@@ -198,12 +165,10 @@ export default function TeacherDashboard() {
     const unsub = onValue(analyticsRef, (snap) => {
       const data = snap.exists() ? snap.val() : {};
       setAnalyticsTree(data);
-      console.log("Analytics Data:", data); // Debugging log
       setIsLoading(false);
 
       if (!isInitialLoad.current) {
-        setShowToast(true);
-        setTimeout(() => setShowToast(false), 4000);
+        toast.success('New analytics data in 📊\nClass metrics have been updated.');
       }
       isInitialLoad.current = false;
     });
@@ -317,7 +282,7 @@ export default function TeacherDashboard() {
 
     // Smart insights strings
     const smartInsights = [];
-    for (const [concept, avg] of Object.entries(conceptAggregates)) {
+    for (const [concept] of Object.entries(conceptAggregates)) {
       const pct = studentRows.filter((s) => (s.weakAreas || []).includes(concept)).length;
       const ratio = participantCount > 0 ? Math.round((pct / participantCount) * 100) : 0;
       if (ratio >= 50) smartInsights.push(`${ratio}% of students are weak in ${concept}`);
@@ -390,23 +355,6 @@ export default function TeacherDashboard() {
   return (
     <div className="bg-surface text-on-surface font-body min-h-screen">
       <AppHeader variant="teacher" />
-
-      {/* Toast */}
-      <div
-        className={`fixed top-24 right-4 z-50 bg-white border border-primary/20 shadow-xl rounded-2xl px-5 py-4 flex items-center gap-3 transition-all duration-500 ${
-          showToast ? 'translate-x-0 opacity-100' : 'translate-x-[120%] opacity-0 pointer-events-none'
-        }`}
-        role="alert"
-        aria-live="polite"
-      >
-        <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
-          <span className="material-symbols-outlined text-xl">insights</span>
-        </div>
-        <div>
-          <p className="font-bold text-sm text-on-surface">📊 New analytics data in</p>
-          <p className="text-xs text-on-surface-variant">Class metrics have been updated.</p>
-        </div>
-      </div>
 
       <div className="min-h-screen">
 
@@ -500,7 +448,6 @@ export default function TeacherDashboard() {
                     .sort((a, b) => a[1] - b[1]) // weakest first
                     .slice(0, 6)
                     .map(([concept, avg]) => {
-                      const color = avg >= 75 ? 'bg-primary text-primary' : avg >= 50 ? 'bg-secondary text-secondary' : 'bg-error text-error';
                       const barColor = avg >= 75 ? 'bg-primary' : avg >= 50 ? 'bg-secondary' : 'bg-error';
                       const textColor = avg >= 75 ? 'text-primary' : avg >= 50 ? 'text-secondary' : 'text-error';
                       return (

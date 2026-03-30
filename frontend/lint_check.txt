@@ -1,0 +1,15 @@
+﻿
+> focus-flow-app@0.1.0 lint
+> eslint
+
+
+D:\Focus-Flow\frontend\app\layout.jsx
+  18:9  warning  Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
+
+D:\Focus-Flow\frontend\app\test\[id]\page.jsx
+  246:3  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+  250:6  warning  React Hook useCallback has a missing dependency: 'submitToServer'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+Γ£û 3 problems (0 errors, 3 warnings)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+

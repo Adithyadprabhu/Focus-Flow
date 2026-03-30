@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -16,7 +16,7 @@ const AI_STATS = [
   ['18m', 'Est. Time'],
 ];
 
-export default function CreateTest() {
+function CreateTestContent() {
   const searchParams = useSearchParams();
   const editId = searchParams.get('edit'); // present when editing an existing test
 
@@ -25,7 +25,7 @@ export default function CreateTest() {
   const [description, setDescription] = useState('');
   const [subject, setSubject] = useState(SUBJECTS[0]);
   const [timeLimit, setTimeLimit] = useState(60);
-  
+
   // Dynamic Questions State
   const defaultQuestion = {
     id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(7),
@@ -36,8 +36,8 @@ export default function CreateTest() {
     difficulty: 'Medium',
     timePerQuestion: 60
   };
-  const [questions, setQuestions] = useState([{...defaultQuestion}]);
-  
+  const [questions, setQuestions] = useState([{ ...defaultQuestion }]);
+
   // Test Publishing Ecosystem State
   const [testId, setTestId] = useState(null);
   const [isPublished, setIsPublished] = useState(false);
@@ -49,7 +49,7 @@ export default function CreateTest() {
   const [availableStudents, setAvailableStudents] = useState([]);
   const [selectedStudents, setSelectedStudents] = useState(new Set());
   const [showStudentPanel, setShowStudentPanel] = useState(false);
-  
+
   // UI States
   const [shuffleQuestions, setShuffleQuestions] = useState(true);
   const [autoSubmit, setAutoSubmit] = useState(false);
@@ -127,7 +127,6 @@ export default function CreateTest() {
     };
 
     loadTest();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editId]);
 
   // Helper Methods
@@ -198,16 +197,16 @@ export default function CreateTest() {
       setShowStudentPanel(true);
       return;
     }
-    
+
     // Validate empty questions
     for (const [i, q] of questions.entries()) {
       if (!q.questionText.trim()) {
-         triggerToast(`Question ${i+1} is missing text!`);
-         return;
+        triggerToast(`Question ${i + 1} is missing text!`);
+        return;
       }
       if (!Object.values(q.options).every(val => val.trim() !== '')) {
-         triggerToast(`Question ${i+1} has empty options!`);
-         return;
+        triggerToast(`Question ${i + 1} has empty options!`);
+        return;
       }
     }
 
@@ -304,12 +303,11 @@ export default function CreateTest() {
 
   return (
     <div className="font-body bg-background text-on-surface min-h-screen pb-32">
-      
+
       {/* Dynamic Toast Element */}
-      <div 
-        className={`fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-surface-container-highest border border-outline-variant/30 shadow-2xl rounded-xl px-6 py-3.5 flex items-center gap-3 transition-all duration-300 ${
-          showToast ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-4 pointer-events-none'
-        }`}
+      <div
+        className={`fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-surface-container-highest border border-outline-variant/30 shadow-2xl rounded-xl px-6 py-3.5 flex items-center gap-3 transition-all duration-300 ${showToast ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-4 pointer-events-none'
+          }`}
       >
         <span className="font-extrabold text-sm text-on-surface tracking-wide">{toastMessage}</span>
       </div>
@@ -332,12 +330,11 @@ export default function CreateTest() {
           <div>
             <h1 className="font-headline font-black text-primary text-xl leading-tight">{editId ? 'Edit Test' : 'Create Smart Test'}</h1>
             <div className="flex items-center gap-2 mt-0.5">
-              <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest ${
-                isPublished ? 'bg-green-100 text-green-700'
+              <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest ${isPublished ? 'bg-green-100 text-green-700'
                 : editId ? 'bg-blue-100 text-blue-700'
-                : testId ? 'bg-yellow-100 text-yellow-700'
-                : 'bg-surface-container-high text-on-surface-variant'
-              }`}>
+                  : testId ? 'bg-yellow-100 text-yellow-700'
+                    : 'bg-surface-container-high text-on-surface-variant'
+                }`}>
                 {isPublished ? 'Published' : editId ? 'Editing' : testId ? 'Draft Saved' : 'Unsaved Draft'}
               </span>
             </div>
@@ -442,8 +439,8 @@ export default function CreateTest() {
             {questions.map((q, index) => (
               <div key={q.id} className="bg-surface-container-lowest rounded-xl p-8 shadow-sm border-l-4 border-primary hover:shadow-ambient transition-all relative">
                 {/* Delete Button (floating) */}
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => handleDeleteQuestion(index)}
                   className="absolute top-4 right-4 p-2 text-on-surface-variant hover:text-error hover:bg-error/10 rounded-full transition-colors flex items-center justify-center"
                   aria-label="Delete question"
@@ -455,14 +452,14 @@ export default function CreateTest() {
                   {/* Metadata Editor: Concept & Difficulty */}
                   <div className="flex gap-4 items-center">
                     <span className="text-xs font-bold text-outline uppercase">Q{index + 1}.</span>
-                    <input 
+                    <input
                       type="text"
                       className="text-xs bg-surface-container-low border-none rounded-full py-1.5 px-4 focus:ring-2 focus:ring-primary/20 text-on-surface outline-none w-32 font-bold"
                       placeholder="Concept Tag"
                       value={q.conceptTag}
                       onChange={(e) => handleQuestionChange(index, 'conceptTag', e.target.value)}
                     />
-                    <select 
+                    <select
                       className="text-xs bg-surface-container-low border-none rounded-full py-1.5 px-3 focus:ring-2 focus:ring-primary/20 text-on-surface outline-none font-bold"
                       value={q.difficulty}
                       onChange={(e) => handleQuestionChange(index, 'difficulty', e.target.value)}
@@ -542,14 +539,14 @@ export default function CreateTest() {
               <div className="space-y-2">
                 <label htmlFor="time-range" className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Total Time Limit</label>
                 <div className="flex items-center gap-3">
-                  <input 
-                    id="time-range" 
-                    className="w-full h-2 bg-outline-variant/30 rounded-lg appearance-none cursor-pointer accent-primary" 
-                    type="range" 
+                  <input
+                    id="time-range"
+                    className="w-full h-2 bg-outline-variant/30 rounded-lg appearance-none cursor-pointer accent-primary"
+                    type="range"
                     value={timeLimit}
                     onChange={(e) => setTimeLimit(e.target.value)}
-                    min="5" 
-                    max="180" 
+                    min="5"
+                    max="180"
                   />
                   <span className="text-sm font-bold w-12 text-on-surface">{timeLimit}m</span>
                 </div>
@@ -668,9 +665,8 @@ export default function CreateTest() {
                           <li key={student.uid}>
                             <label
                               htmlFor={`student-${student.uid}`}
-                              className={`flex items-center gap-3 px-5 py-3.5 cursor-pointer transition-colors ${
-                                isSelected ? 'bg-primary/5' : 'hover:bg-surface-container-low'
-                              }`}
+                              className={`flex items-center gap-3 px-5 py-3.5 cursor-pointer transition-colors ${isSelected ? 'bg-primary/5' : 'hover:bg-surface-container-low'
+                                }`}
                             >
                               <input
                                 id={`student-${student.uid}`}
@@ -679,9 +675,8 @@ export default function CreateTest() {
                                 onChange={() => toggleStudent(student.uid)}
                                 className="w-4 h-4 rounded text-primary border-outline-variant focus:ring-primary/20 accent-primary cursor-pointer flex-shrink-0"
                               />
-                              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0 ${
-                                isSelected ? 'bg-primary text-white' : 'bg-surface-container text-on-surface-variant'
-                              }`}>
+                              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0 ${isSelected ? 'bg-primary text-white' : 'bg-surface-container text-on-surface-variant'
+                                }`}>
                                 {(student.name || student.email || 'S').charAt(0).toUpperCase()}
                               </div>
                               <div className="min-w-0 flex-1">
@@ -715,10 +710,10 @@ export default function CreateTest() {
               <p className="text-xs font-semibold mb-3">{questions[0]?.questionText || 'Preview...'}</p>
               <div className="space-y-2">
                 <div className="h-6 bg-white rounded border border-outline-variant/20 overflow-hidden text-[10px] px-2 flex items-center text-outline">
-                   {questions[0]?.options?.A || ''}
+                  {questions[0]?.options?.A || ''}
                 </div>
                 <div className="h-6 bg-primary/10 rounded border border-primary/30 text-primary text-[10px] px-2 flex items-center overflow-hidden">
-                   {questions[0]?.options?.B || ''}
+                  {questions[0]?.options?.B || ''}
                 </div>
               </div>
             </div>
@@ -730,10 +725,10 @@ export default function CreateTest() {
       <footer className="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-2xl z-50 px-6 py-4 flex items-center justify-between shadow-[0_-10px_40px_rgba(53,37,205,0.06)] border-t border-outline-variant/20">
         <div className="flex items-center gap-4">
           {/* Save Draft — always enabled; uses update() so it never wipes isPublished or assignedTo */}
-          <button 
+          <button
             onClick={handleSaveDraft}
             disabled={isSaving}
-            type="button" 
+            type="button"
             className={`flex items-center gap-2 font-bold text-sm transition-colors px-4 py-2 rounded-lg ${isSaving ? 'text-outline-variant cursor-not-allowed' : 'text-on-surface-variant hover:text-primary active:bg-surface-container-low'}`}
           >
             <span className="material-symbols-outlined text-xl" aria-hidden="true">
@@ -743,28 +738,27 @@ export default function CreateTest() {
           </button>
           <div className="h-4 w-[1px] bg-outline-variant" aria-hidden="true" />
           <p className="text-xs text-on-surface-variant hidden sm:block">
-            {testId ? `ID: ${testId.substring(0,8)}...` : 'Not saved yet'}
+            {testId ? `ID: ${testId.substring(0, 8)}...` : 'Not saved yet'}
           </p>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <button type="button" className="hidden sm:flex items-center gap-2 bg-surface-container-low text-on-surface font-bold px-6 py-3 rounded-full text-sm hover:bg-surface-container transition-all active:scale-[0.98]">
             <span className="material-symbols-outlined text-xl" aria-hidden="true">visibility</span>
             Preview Full Test
           </button>
-          
+
           {/* Publish / Re-publish — available even on edit if not currently publishing */}
-          <button 
+          <button
             onClick={handlePublish}
             disabled={isPublishing || !testId}
-            type="button" 
-            className={`flex items-center gap-2 font-bold px-8 py-3 rounded-full text-sm shadow-lg shadow-primary/20 transition-all ${
-              isPublishing || !testId
-                ? 'bg-outline text-white opacity-70 cursor-not-allowed'
-                : isPublished
-                  ? 'bg-gradient-to-tr from-green-500 to-emerald-600 text-white hover:shadow-green-200 active:scale-[0.98]'
-                  : 'bg-gradient-to-tr from-primary to-secondary text-white hover:shadow-primary/30 active:scale-[0.98]'
-            }`}
+            type="button"
+            className={`flex items-center gap-2 font-bold px-8 py-3 rounded-full text-sm shadow-lg shadow-primary/20 transition-all ${isPublishing || !testId
+              ? 'bg-outline text-white opacity-70 cursor-not-allowed'
+              : isPublished
+                ? 'bg-gradient-to-tr from-green-500 to-emerald-600 text-white hover:shadow-green-200 active:scale-[0.98]'
+                : 'bg-gradient-to-tr from-primary to-secondary text-white hover:shadow-primary/30 active:scale-[0.98]'
+              }`}
           >
             <span className="material-symbols-outlined text-xl" aria-hidden="true">
               {isPublished ? 'published_with_changes' : (isPublishing ? 'public' : 'rocket_launch')}
@@ -774,5 +768,22 @@ export default function CreateTest() {
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function CreateTest() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-surface font-body">
+        <div className="text-center space-y-4">
+          <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto animate-spin">
+            <span className="material-symbols-outlined text-primary text-2xl">hourglass_empty</span>
+          </div>
+          <p className="font-bold text-on-surface-variant">Loading test environment...</p>
+        </div>
+      </div>
+    }>
+      <CreateTestContent />
+    </Suspense>
   );
 }

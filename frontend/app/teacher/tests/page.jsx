@@ -63,12 +63,6 @@ export default function TeacherTestsPage() {
   const publishedCount = (tests || []).filter((t) => t.isPublished).length;
   const draftCount = totalTests - publishedCount;
 
-  const getDifficultyColor = (d) => {
-    if (d === 'Easy') return 'bg-green-100 text-green-700';
-    if (d === 'Hard') return 'bg-red-100 text-red-700';
-    return 'bg-amber-100 text-amber-700';
-  };
-
   // ── Toggle Publish ──
   const handleTogglePublish = async (test) => {
     setActionLoading(test.id);
@@ -134,7 +128,7 @@ export default function TeacherTestsPage() {
               </Link>
               <h1 className="text-3xl md:text-4xl font-extrabold font-headline tracking-tight">My Tests</h1>
             </div>
-            <p className="text-on-surface-variant ml-9">All tests you've created — drafts and published.</p>
+            <p className="text-on-surface-variant ml-9">All tests you&apos;ve created — drafts and published.</p>
           </div>
           <Link href="/teacher/create-test">
             <button type="button" className="flex items-center gap-2 bg-gradient-to-br from-primary to-secondary text-white px-6 py-3 rounded-full font-bold text-sm shadow-lg hover:scale-105 transition-all">

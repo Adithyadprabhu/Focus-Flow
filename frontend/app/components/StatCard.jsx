@@ -1,3 +1,5 @@
+import React from 'react';
+
 /**
  * StatCard — metric display card with icon, label, value, and optional progress bar.
  *
@@ -11,7 +13,7 @@
  *  - badgeBg?: string  (Tailwind bg+text classes for badge)
  *  - iconBg?: string  (Tailwind classes for icon container)
  */
-export default function StatCard({
+const StatCard = React.memo(({
   icon,
   label,
   value,
@@ -20,7 +22,7 @@ export default function StatCard({
   badge,
   badgeBg = 'bg-surface-container text-on-surface-variant',
   iconBg = 'bg-primary/10 text-primary',
-}) {
+}) => {
   return (
     <div className="bg-surface-container-lowest p-8 rounded-xl shadow-ambient relative overflow-hidden group border border-outline-variant/10">
       {/* Decorative icon */}
@@ -62,4 +64,8 @@ export default function StatCard({
       </div>
     </div>
   );
-}
+});
+
+StatCard.displayName = 'StatCard';
+
+export default StatCard;

@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import AppHeader from './components/AppHeader';
 
 import { auth, db } from '../lib/firebase';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { ref, set, get, child, serverTimestamp } from 'firebase/database';
 
 export default function AuthPage() {
@@ -233,7 +233,7 @@ export default function AuthPage() {
 
             <div className="mt-8 text-center border-t border-outline-variant/20 pt-8">
               <p className="text-on-surface-variant text-sm font-medium">
-                Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
                 <button type="button" onClick={() => {setErrorMsg(''); setAuthView('register');}} className="text-primary font-bold hover:underline">
                   Create one
                 </button>

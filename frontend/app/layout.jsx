@@ -1,4 +1,9 @@
+import { Plus_Jakarta_Sans, Inter } from 'next/font/google';
+import { Toaster } from 'react-hot-toast';
 import './globals.css';
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const plusJakartaSans = Plus_Jakarta_Sans({ subsets: ['latin'], variable: '--font-plus-jakarta' });
 
 export const metadata = {
   title: 'Focus-Flow | The Fluid Academy',
@@ -7,17 +12,10 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${inter.variable} ${plusJakartaSans.variable}`}>
       <head>
-        {/* Preconnect for faster font loading */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        {/* Critical fonts */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&family=Inter:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
         {/* Material Symbols */}
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
           rel="stylesheet"
@@ -27,6 +25,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className="min-h-screen flex flex-col font-body bg-surface text-on-surface antialiased">
         {children}
+        <Toaster position="top-right" />
       </body>
     </html>
   );

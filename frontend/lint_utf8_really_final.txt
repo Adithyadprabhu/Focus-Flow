@@ -1,0 +1,16 @@
+
+> focus-flow-app@0.1.0 lint
+> eslint
+
+
+D:\Focus-Flow\frontend\app\layout.jsx
+  18:9  warning  Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
+
+D:\Focus-Flow\frontend\app\student\results\page.jsx
+  3:31  warning  'useRef' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Focus-Flow\frontend\app\test\[id]\page.jsx
+  146:9  warning  The 'submitToServer' function makes the dependencies of useCallback Hook (at line 249) change on every render. To fix this, wrap the definition of 'submitToServer' in its own useCallback() Hook  react-hooks/exhaustive-deps
+
+✖ 3 problems (0 errors, 3 warnings)
+

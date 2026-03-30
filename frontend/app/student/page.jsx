@@ -1,120 +1,31 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
 import AppHeader from '../components/AppHeader';
 import BottomNav from '../components/BottomNav';
 import GradientFAB from '../components/GradientFAB';
-import { onAuthStateChanged } from 'firebase/auth';
+import AnimatedNumber from '../components/AnimatedNumber';
+import Skeleton from '../components/Skeleton';
+import StudentLineChart from '../components/StudentLineChart';
 import { ref, onValue } from 'firebase/database';
-import { auth, db } from '../../lib/firebase';
+import { db } from '../../lib/firebase';
+import { useAuthUser } from '../hooks/useAuthUser';
+import toast from 'react-hot-toast';
 
-// ─── Pure-SVG Line Chart ──────────────────────────────────────────────────────
-function LineChart({ data, color = '#3525cd', height = 120 }) {
-  if (!data || data.length < 2) {
-    return (
-      <div className="flex items-center justify-center h-full text-on-surface-variant text-sm font-medium opacity-60">
-        Complete more tests to see your trend
-      </div>
-    );
-  }
 
-  const w = 600;
-  const h = height;
-  const pad = 12;
-
-  const max = Math.max(...data.map((d) => d.value), 1);
-  const min = Math.min(...data.map((d) => d.value), 0);
-  const range = max - min || 1;
-
-  const points = data.map((d, i) => {
-    const x = pad + (i / (data.length - 1)) * (w - pad * 2);
-    const y = h - pad - ((d.value - min) / range) * (h - pad * 2);
-    return `${x},${y}`;
-  });
-
-  const polyline = points.join(' ');
-  // filled area path
-  const first = points[0];
-  const last = points[points.length - 1];
-  const areaPath = `M ${first} L ${polyline.split(' ').slice(1).join(' L ')} L ${last.split(',')[0]},${h - pad} L ${first.split(',')[0]},${h - pad} Z`;
-
-  return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="w-full" preserveAspectRatio="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="chart-fill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.18" />
-          <stop offset="100%" stopColor={color} stopOpacity="0.01" />
-        </linearGradient>
-      </defs>
-      <path d={areaPath} fill="url(#chart-fill)" />
-      <polyline
-        points={polyline}
-        fill="none"
-        stroke={color}
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {data.map((d, i) => {
-        const x = pad + (i / (data.length - 1)) * (w - pad * 2);
-        const y = h - pad - ((d.value - min) / range) * (h - pad * 2);
-        return (
-          <circle key={i} cx={x} cy={y} r="5" fill="white" stroke={color} strokeWidth="2.5" />
-        );
-      })}
-    </svg>
-  );
-}
-
-// ─── Animated Number ──────────────────────────────────────────────────────────
-function AnimatedNumber({ value, suffix = '' }) {
-  const [display, setDisplay] = useState(0);
-  const raf = useRef(null);
-
-  useEffect(() => {
-    const start = display;
-    const end = Number(value) || 0;
-    const duration = 700;
-    const startTime = performance.now();
-
-    const tick = (now) => {
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplay(Math.round(start + (end - start) * eased));
-      if (progress < 1) raf.current = requestAnimationFrame(tick);
-    };
-
-    raf.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf.current);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value]);
-
-  return <span>{display}{suffix}</span>;
-}
-
-// ─── Skeleton Loader ──────────────────────────────────────────────────────────
-function Skeleton({ className = '' }) {
-  return <div className={`bg-surface-container-high animate-pulse rounded-xl ${className}`} />;
-}
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function StudentDashboard() {
-  const [user, setUser] = useState(null);
+  const { user, loading: authLoading } = useAuthUser();
   const [analyticsMap, setAnalyticsMap] = useState(null); // { [testId]: analyticsObj }
   const [isLoading, setIsLoading] = useState(true);
-  const [showToast, setShowToast] = useState(false);
   const isInitialLoad = useRef(true);
 
-  // ── Auth ──
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      if (!u) setIsLoading(false);
-    });
-    return () => unsub();
-  }, []);
+    if (!authLoading && !user) {
+      setTimeout(() => setIsLoading(false), 0);
+    }
+  }, [authLoading, user]);
 
   // ── Real-time analytics listener ──
   useEffect(() => {
@@ -127,8 +38,7 @@ export default function StudentDashboard() {
       setIsLoading(false);
 
       if (!isInitialLoad.current) {
-        setShowToast(true);
-        setTimeout(() => setShowToast(false), 3500);
+        toast.success('Analytics updated 📊\nYour latest results are live.');
       }
       isInitialLoad.current = false;
     });
@@ -166,23 +76,6 @@ export default function StudentDashboard() {
   return (
     <div className="bg-surface font-body text-on-surface min-h-screen">
       <AppHeader variant="student" />
-
-      {/* Analytics Updated Toast */}
-      <div
-        className={`fixed top-24 right-4 z-50 bg-white border border-primary/20 shadow-xl rounded-2xl px-5 py-4 flex items-center gap-3 transition-all duration-500 ${
-          showToast ? 'translate-x-0 opacity-100' : 'translate-x-[120%] opacity-0 pointer-events-none'
-        }`}
-        role="alert"
-        aria-live="polite"
-      >
-        <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
-          <span className="material-symbols-outlined text-xl">insights</span>
-        </div>
-        <div>
-          <p className="font-bold text-sm text-on-surface">Analytics updated 📊</p>
-          <p className="text-xs text-on-surface-variant">Your latest results are live.</p>
-        </div>
-      </div>
 
       <main className="max-w-7xl mx-auto px-6 pt-8 pb-32">
 
@@ -294,7 +187,7 @@ export default function StudentDashboard() {
                 {isLoading ? (
                   <Skeleton className="h-full w-full" />
                 ) : (
-                  <LineChart data={chartData} color="#3525cd" height={144} />
+                  <StudentLineChart data={chartData} color="#3525cd" height={144} />
                 )}
               </div>
               {!isLoading && chartData.length > 1 && (

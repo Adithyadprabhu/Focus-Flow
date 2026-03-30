@@ -1,0 +1,63 @@
+
+> focus-flow-app@0.1.0 lint
+> eslint
+
+
+D:\Focus-Flow\frontend\app\components\StatCard.jsx
+  16:18  error  Component definition is missing display name  react/display-name
+
+D:\Focus-Flow\frontend\app\components\StudentLineChart.jsx
+  12:26  error  Component definition is missing display name  react/display-name
+
+D:\Focus-Flow\frontend\app\layout.jsx
+  18:9  warning  Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
+
+D:\Focus-Flow\frontend\app\student\page.jsx
+  25:32  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  23 |
+  24 |   useEffect(() => {
+> 25 |     if (!authLoading && !user) setIsLoading(false);
+     |                                ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  26 |   }, [authLoading, user]);
+  27 |
+  28 |   // ── Real-time analytics listener ──  react-hooks/set-state-in-effect
+
+D:\Focus-Flow\frontend\app\student\results\page.jsx
+  3:31  warning  'useRef' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Focus-Flow\frontend\app\teacher\create-test\page.jsx
+  130:5  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+
+D:\Focus-Flow\frontend\app\teacher\page.jsx
+  133:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  131 |     if (!authLoading && !user) {
+  132 |       router.push('/');
+> 133 |       setIsLoading(false);
+      |       ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  134 |     }
+  135 |   }, [authLoading, user, router]);
+  136 |  react-hooks/set-state-in-effect
+
+D:\Focus-Flow\frontend\app\test\[id]\page.jsx
+  249:6  warning  React Hook useCallback has unnecessary dependencies: 'startedAt' and 'testId'. Either exclude them or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\Focus-Flow\frontend\app\test\[id]\results\page.jsx
+  16:10  warning  'user' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+✖ 9 problems (4 errors, 5 warnings)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+

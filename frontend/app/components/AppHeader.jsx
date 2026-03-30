@@ -2,9 +2,9 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { ref, onValue } from 'firebase/database';
-import { auth, db } from '../../lib/firebase';
+import { signOut } from 'firebase/auth';
+import { auth } from '../../lib/firebase';
+import { useAuthUser } from '../hooks/useAuthUser';
 
 /**
  * AppHeader — shared sticky navigation with live auth + profile dropdown.
@@ -14,28 +14,9 @@ import { auth, db } from '../../lib/firebase';
 export default function AppHeader({ variant = 'login' }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState(null);
-  const [userData, setUserData] = useState(null);
+  const { user, userData } = useAuthUser();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-
-  // ── Auth listener ──
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-    });
-    return () => unsub();
-  }, []);
-
-  // ── Fetch user profile from RTDB ──
-  useEffect(() => {
-    if (!user) { setUserData(null); return; }
-    const userRef = ref(db, `users/${user.uid}`);
-    const unsub = onValue(userRef, (snap) => {
-      setUserData(snap.exists() ? snap.val() : null);
-    });
-    return () => unsub();
-  }, [user]);
 
   // ── Close dropdown on outside click ──
   useEffect(() => {

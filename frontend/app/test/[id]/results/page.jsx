@@ -13,7 +13,6 @@ export default function TestAnalyticsResult() {
   const params = useParams();
   const testId = params.id;
 
-  const [user, setUser] = useState(null);
   const [testData, setTestData] = useState(null);
   const [analytics, setAnalytics] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -48,7 +47,6 @@ export default function TestAnalyticsResult() {
 
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
-        setUser(currentUser);
         fetchResults(currentUser);
       } else {
         router.push('/login');

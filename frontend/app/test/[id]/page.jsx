@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { onAuthStateChanged } from 'firebase/auth';
-import { ref, set, get, push, query, orderByChild, equalTo, onDisconnect, serverTimestamp, remove } from 'firebase/database';
+import { ref, set, get, push, onDisconnect, serverTimestamp, remove } from 'firebase/database';
 import { auth, db } from '../../../lib/firebase';
+import toast from 'react-hot-toast';
 
 export default function TestTakingInterface() {
   const router = useRouter();
@@ -22,13 +23,8 @@ export default function TestTakingInterface() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [startedAt, setStartedAt] = useState(null);
   
-  const [toastMessage, setToastMessage] = useState('');
-  const [showToast, setShowToast] = useState(false);
-
   const triggerToast = (msg) => {
-    setToastMessage(msg);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
+    toast(msg);
   };
 
   // 1. Auth & Data Fetching
@@ -250,7 +246,8 @@ export default function TestTakingInterface() {
   const handleAutoSubmit = useCallback(() => {
     triggerToast('Time is up! Auto-submitting...');
     submitToServer(answers);
-  }, [answers, testId, startedAt]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [answers]);
 
   const handleManualSubmit = () => {
     const unansweredCount = questions.length - Object.keys(answers).length;
@@ -288,14 +285,7 @@ export default function TestTakingInterface() {
 
   return (
     <div className="bg-surface font-body text-on-surface min-h-screen relative flex flex-col">
-      {/* Dynamic Toast Element */}
-      <div 
-        className={`fixed top-6 left-1/2 -translate-x-1/2 z-[100] bg-surface-container-highest border border-outline-variant/30 shadow-2xl rounded-xl px-6 py-3.5 flex items-center gap-3 transition-all duration-300 ${
-          showToast ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-4 pointer-events-none'
-        }`}
-      >
-        <span className="font-extrabold text-sm text-on-surface tracking-wide">{toastMessage}</span>
-      </div>
+
 
       {/* Top Bar Navigation */}
       <header className="bg-white px-6 py-4 flex items-center justify-between shadow-sm sticky top-0 z-40 border-b border-outline-variant/20">
